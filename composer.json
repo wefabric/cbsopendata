@@ -1,0 +1,22 @@
+{
+  "name": "wefabric/cbsopendata",
+  "description": "PHP package to handle CBS open Data",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "leoflapper",
+      "email": "leo@wefabric.nl"
+    }
+  ],
+  "require": {
+    "symfony/var-dumper": "^5.2",
+    "illuminate/support": "^8.32",
+    "guzzlehttp/guzzle": "^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "CBSOpenData\\": "src/"
+    }
+  }
+}
