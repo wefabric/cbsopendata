@@ -11,12 +11,6 @@ class ResidencesTableInfos extends AbstractData
 
     const CACHE_KEY = 'opendata_residences_table_infos';
 
-    protected $keys = [
-        'ID' => 'id',
-        'Woonplaatscode' => 'residence_code',
-        'Naam_2' => 'municipality_name',
-    ];
-
     protected function parseData(Collection $data): Collection
     {
         $result = new Collection();
@@ -26,7 +20,7 @@ class ResidencesTableInfos extends AbstractData
             if(isset($item['Woonplaatsen'], $item['Woonplaatscode_1'])) {
                 $residence = [
                     'Name' => rtrim($item['Woonplaatsen']),
-                    'code' => rtrim($item['Woonplaatscode_1'])
+                    'Code' => rtrim($item['Woonplaatscode_1'])
                 ];
 
                 $itemCollection->put('Residence', $residence);
@@ -60,7 +54,6 @@ class ResidencesTableInfos extends AbstractData
             }
 
             $result->put($key, $itemCollection);
-
         }
         return $result;
     }
