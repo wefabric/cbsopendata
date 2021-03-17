@@ -2,19 +2,17 @@
 
 require '../vendor/autoload.php';
 
-
-dd((new \CBSOpenData\Data())->get('regions', true));
-//$data = new \CBSOpenData\Data();
-//dd($data->get('residences', true));
 set_time_limit(0); // safe_mode is off
 ini_set('max_execution_time', 0); //500 seconds
 $combined = new \CBSOpenData\Collections\Combined();
-$regions = $combined->get(true);
 
+// Retrieves the combined data in a multi dimensional array
+$regions = $combined->get($cached = true);
 
+// Everything is placed within collections for easy retrieving
 $sudwestFryslan = $regions
     ->where('Name', 'Noord-Nederland')
-    ->first()->get('Provinces')
+        ->first()->get('Provinces')
     ->where('Name', 'Fryslân')
     ->first()->get('Municipalities')
     ->where('Name', 'Súdwest-Fryslân')
@@ -28,4 +26,3 @@ foreach ($regions as $regionKey => $region) {
         }
     }
 }
-exit;

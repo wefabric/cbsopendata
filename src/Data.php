@@ -8,13 +8,16 @@ use CBSOpenData\Data\DistrictsAndNeighbourhoods;
 use CBSOpenData\Data\Regions;
 use CBSOpenData\Data\Residences;
 use CBSOpenData\Data\ResidencesTableInfos;
+use CBSOpenData\Traits\UseFilesystem;
 use Illuminate\Support\Collection;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
 
 class Data
 {
+    use UseFilesystem;
 
+    /**
+     * @var string[]
+     */
     protected $dataTypes = [
         'regions' => Regions::class,
         'residences' => Residences::class,
@@ -23,9 +26,40 @@ class Data
     ];
 
     /**
-     * @var Filesystem
+     * @param false $cache
+     * @return Collection
      */
-    protected $fileSystem;
+    public function getRegions($cache = false): Collection
+    {
+        return $this->get('regions', $cache);
+    }
+
+    /**
+     * @param false $cache
+     * @return Collection
+     */
+    public function getResidences($cache = false): Collection
+    {
+        return $this->get('residences', $cache);
+    }
+
+    /**
+     * @param false $cache
+     * @return Collection
+     */
+    public function getResidencesTableInfo($cache = false): Collection
+    {
+        return $this->get('residences_table_infos', $cache);
+    }
+
+    /**
+     * @param false $cache
+     * @return Collection
+     */
+    public function getDistrictsAndNeighbourhoods($cache = false): Collection
+    {
+        return $this->get('districts_and_neighbourhoods', $cache);
+    }
 
     /**
      * @param $type
@@ -36,28 +70,10 @@ class Data
     {
         if(isset($this->dataTypes[$type])) {
             $dataTypeClass = (new $this->dataTypes[$type]);
-            $dataTypeClass->setFileSystem($this->getFileSystem());
+            $dataTypeClass->setFilesystem($this->getFilesystem());
             return $dataTypeClass->get($cache);
         }
     }
 
-    /**
-     * @return Filesystem
-     */
-    public function getFileSystem()
-    {
-        if(!$this->fileSystem) {
-            $this->setFileSystem(new Filesystem(new Local(OpenData::cachePath())));
-        }
 
-        return $this->fileSystem;
-    }
-
-    /**
-     * @param Filesystem $filesystem
-     */
-    public function setFileSystem(Filesystem $filesystem): void
-    {
-        $this->fileSystem = $filesystem;
-    }
 }

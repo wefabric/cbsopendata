@@ -5,10 +5,14 @@ namespace CBSOpenData\Collections;
 
 
 use CBSOpenData\Data;
+use CBSOpenData\Traits\UseFilesystem;
 use Illuminate\Support\Collection;
+use League\Flysystem\FileNotFoundException;
 
 class Combined
 {
+    use UseFilesystem;
+
     const CACHE_KEY = 'living_data';
 
     public function __construct()
@@ -34,10 +38,12 @@ class Combined
      */
     private function getFromCache(string $cache): Collection
     {
-        if(!file_exists($cache.'.json')) {
+        try {
+            $file = $this->getFilesystem()->get($cache.'.json');
+            return collect(json_decode($file->read(), true))->recursive();
+        } catch (FileNotFoundException $e) {
             return $this->getFromOpenData($cache);
         }
-        return collect(json_decode(file_get_contents($cache.'.json'), true))->recursive();
     }
 
 
@@ -67,7 +73,7 @@ class Combined
         if($result = $this->getBaseData($baseDataCache)) {
             $result =  $this->getWithResidences($result);
             if($result) {
-                file_put_contents(self::CACHE_KEY.'.json', $result->toJson());
+                $this->getFilesystem()->put(self::CACHE_KEY.'.json', $result->toJson());
             }
         }
         return $result;
@@ -148,7 +154,7 @@ class Combined
             $living->put($countryPartKey, $countryPart);
         }
         if($cache) {
-            file_put_contents($cache.'.json', $living->toJson());
+            $this->getFilesystem()->put($cache.'.json', $living->toJson());
         }
         return $living;
     }

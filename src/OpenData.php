@@ -6,12 +6,18 @@ namespace CBSOpenData;
 
 class OpenData
 {
-    public static function rootPath()
+    /**
+     * @return string
+     */
+    public static function rootPath(): string
     {
         return __DIR__.'/../';
     }
 
-    public static function cachePath()
+    /**
+     * @return string
+     */
+    public static function cachePath(): string
     {
         return self::rootPath().'cache';
     }
