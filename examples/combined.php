@@ -7,7 +7,7 @@ ini_set('max_execution_time', 0); //500 seconds
 $combined = new \CBSOpenData\Collections\Combined();
 
 // Retrieves the combined data in a multi dimensional array
-$regions = $combined->get($cached = true);
+$regions = $combined->get($cached = false);
 
 // Everything is placed within collections for easy retrieving
 $sudwestFryslan = $regions

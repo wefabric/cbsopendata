@@ -227,6 +227,10 @@ class Combined
                                 // CBS uses 'Wijk 10 NAME', which could be either a residence name or a district
                                 preg_match_all('/Wijk\s\d*\s(.*)/', $matches[1][0], $residenceMatches);
 
+                                if(!isset($residenceMatches[1], $residenceMatches[1][0])) {
+                                    continue;
+                                }
+
                                 if($residence = $residences->where('Title', $residenceMatches[1][0])->first()) {
                                     $residenceKey = $residences->where('Title', $residenceMatches[1][0])->keys()->first();
                                     $residence->get('Districts')->push($item);
