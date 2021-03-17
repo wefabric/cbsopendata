@@ -212,11 +212,10 @@ class Combined
 
                 if(substr($item['Description'], 0, 5) == 'Buurt') {
 
+                    preg_match_all('/in de gemeente \'(.*)\'/', $strippedDescription, $municipalityMatches);
+                    if(isset($municipalityMatches[0], $municipalityMatches[0][0])) {
 
-                    preg_match_all('/in de gemeente \'(.*)\'/', $strippedDescription, $residenceMatches);
-                    if(isset($residenceMatches[0], $residenceMatches[0][0])) {
-
-                        $strippedDescription = str_replace($residenceMatches[0][0], '', $strippedDescription);
+                        $strippedDescription = str_replace($municipalityMatches[0][0], '', $strippedDescription);
                         preg_match_all('/is een buurt in wijk \'(.*)\'/', $strippedDescription, $matches);
 
                         if(isset($matches[1], $matches[1][0])) {
@@ -227,41 +226,46 @@ class Combined
                                 // CBS uses 'Wijk 10 NAME', which could be either a residence name or a district
                                 preg_match_all('/Wijk\s\d*\s(.*)/', $matches[1][0], $residenceMatches);
 
-                                if(!isset($residenceMatches[1], $residenceMatches[1][0])) {
+                                if(isset($residenceMatches[1], $residenceMatches[1][0])) {
+                                    if($residence = $residences->where('Title', $residenceMatches[1][0])->first()) {
+                                        $residenceKey = $residences->where('Title', $residenceMatches[1][0])->keys()->first();
+                                        $district = new Collection($item);
+                                        $district->put('Neighbourhoods', new Collection());
+                                        $residence->get('Districts')->push($district);
+                                        $residences->put($residenceKey, $residence);
+                                    } else {
+                                        if($residence = $rawResidences->where('Title', $residenceMatches[1][0])->first()) {
+                                            $residence->put('Districts', new Collection());
+                                            $district = new Collection($item);
+                                            $district->put('Neighbourhoods', new Collection());
+                                            $residence->get('Districts')->push($district);
+                                            $residences->push($residence);
+                                        }
+                                    }
                                     continue;
                                 }
 
-                                if($residence = $residences->where('Title', $residenceMatches[1][0])->first()) {
-                                    $residenceKey = $residences->where('Title', $residenceMatches[1][0])->keys()->first();
-                                    $residence->get('Districts')->push($item);
-                                    $residences->put($residenceKey, $residence);
-                                } else {
-                                    if($residence = $rawResidences->where('Title', $residenceMatches[1][0])->first()) {
-                                        $residence->put('Districts', new Collection());
-                                        $residence->get('Districts')->push($item);
-                                        $residences->push($residence);
-                                    }
-                                }
-                                continue;
                             }
 
-                            if($residence) {
-                                if(!$residence->get('Districts')->where('Title', $matches[1][0])->first()) {
-                                    $residenceKey = $residences->where('Title', $residenceMatches[1][0])->keys()->first();
-                                    $district = new Collection($item);
-                                    $district->put('Neighbourhoods', new Collection());
-                                    $residence->get('Districts')->push($district);
-                                    $residences->put($residenceKey, $residence);
-                                } else {
-                                    $districtKey = $residences->where('Title', $residenceMatches[1][0])->first()->get('Districts')->where('Title', $matches[1][0])->keys()->first();
+                            if($residence && !$residence->get('Districts')->where('Title', $matches[1][0])->first()) {
+
+                                $residenceKey = $residences->where('Title', $residenceMatches[1][0])->keys()->first();
+                                $district = new Collection($item);
+                                $district->put('Neighbourhoods', new Collection());
+                                $residence->get('Districts')->push($district);
+                                $residences->put($residenceKey, $residence);
+                            } else {
+                                if($residences->where('Title', $municipalityMatches[1][0])->first()) {
+                                    $districtKey = $residences->where('Title', $municipalityMatches[1][0])->first()->get('Districts')->where('Title', $matches[1][0])->keys()->first();
                                     if(!$district->get('Neighbourhoods')) {
                                         $district->put('Neighbourhoods', new Collection());
                                     }
-
                                     $district->get('Neighbourhoods')->push(new Collection($item));
-                                    $residences->where('Title', $residenceMatches[1][0])->first()->get('Districts')->put($districtKey, $district);
+                                    $residences->where('Title', $municipalityMatches[1][0])->first()->get('Districts')->put($districtKey, $district);
                                 }
+
                             }
+
                         }
                     }
                     continue;
