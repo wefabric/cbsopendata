@@ -9,7 +9,7 @@
       "email": "leo@wefabric.nl"
     }
   ],
-  "version": "0.2.3",
+  "version": "0.2.5",
   "require": {
     "symfony/var-dumper": "^5.2",
     "illuminate/support": "^8.32",
