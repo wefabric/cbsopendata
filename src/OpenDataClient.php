@@ -6,9 +6,21 @@ namespace CBSOpenData;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Collection;
+use League\Flysystem\FileNotFoundException;
+use League\Flysystem\Filesystem;
 
 class OpenDataClient
 {
+
+    /**
+     * @var Filesystem
+     */
+    protected $fileSystem;
+
+    public function __construct(Filesystem $filesystem)
+    {
+        $this->fileSystem = $filesystem;
+    }
 
     /**
      * @param string $url
@@ -28,17 +40,13 @@ class OpenDataClient
     {
         $client = new Client();
         $result = new Collection();
-        try {
-            $response = $client->get($url);
-            $openData = json_decode( (string)$response->getBody(), true, $depth=512, JSON_THROW_ON_ERROR);
-            if(isset($openData['value'])) {
-                $result = collect($openData['value']);
-                if($cache) {
-                    file_put_contents($cache.'.json', $result->toJson());
-                }
+        $response = $client->get($url);
+        $openData = json_decode( (string)$response->getBody(), true, $depth=512, JSON_THROW_ON_ERROR);
+        if(isset($openData['value'])) {
+            $result = collect($openData['value']);
+            if($cache) {
+                $this->fileSystem->put($cache.'.json', $result->toJson());
             }
-        } catch (\Exception $e) {
-            dd($e->getMessage());
         }
         return $result;
     }
@@ -49,9 +57,11 @@ class OpenDataClient
      */
     private function getFromCache(string $url, string $cache): Collection
     {
-        if(!file_exists($cache.'.json')) {
+        try {
+            $file = $this->fileSystem->get($cache.'.json');
+            return collect(json_decode($file->read(), true));
+        } catch (FileNotFoundException $e) {
             return $this->getFromUrl($url, $cache);
         }
-        return collect(json_decode(file_get_contents($cache.'.json'), true));
     }
 }

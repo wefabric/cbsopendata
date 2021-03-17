@@ -9,6 +9,8 @@ use CBSOpenData\Data\Regions;
 use CBSOpenData\Data\Residences;
 use CBSOpenData\Data\ResidencesTableInfos;
 use Illuminate\Support\Collection;
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\Filesystem;
 
 class Data
 {
@@ -21,6 +23,11 @@ class Data
     ];
 
     /**
+     * @var Filesystem
+     */
+    protected $fileSystem;
+
+    /**
      * @param $type
      * @param false $cache
      * @return Collection
@@ -28,7 +35,29 @@ class Data
     public function get($type, $cache = false): Collection
     {
         if(isset($this->dataTypes[$type])) {
-            return (new $this->dataTypes[$type])->get($cache);
+            $dataTypeClass = (new $this->dataTypes[$type]);
+            $dataTypeClass->setFileSystem($this->getFileSystem());
+            return $dataTypeClass->get($cache);
         }
+    }
+
+    /**
+     * @return Filesystem
+     */
+    public function getFileSystem()
+    {
+        if(!$this->fileSystem) {
+            $this->setFileSystem(new Filesystem(new Local(OpenData::cachePath())));
+        }
+
+        return $this->fileSystem;
+    }
+
+    /**
+     * @param Filesystem $filesystem
+     */
+    public function setFileSystem(Filesystem $filesystem): void
+    {
+        $this->fileSystem = $filesystem;
     }
 }

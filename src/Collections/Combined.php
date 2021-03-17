@@ -5,12 +5,16 @@ namespace CBSOpenData\Collections;
 
 
 use CBSOpenData\Data;
-use CBSOpenData\OpenDataClient;
 use Illuminate\Support\Collection;
 
-class Living
+class Combined
 {
     const CACHE_KEY = 'living_data';
+
+    public function __construct()
+    {
+        $this->registerRecursiveCollection();
+    }
 
     /**
      * @param false $cache
@@ -30,7 +34,16 @@ class Living
      */
     private function getFromCache(string $cache): Collection
     {
-        \Illuminate\Support\Collection::macro('recursive', function () {
+        if(!file_exists($cache.'.json')) {
+            return $this->getFromOpenData($cache);
+        }
+        return collect(json_decode(file_get_contents($cache.'.json'), true))->recursive();
+    }
+
+
+    private function registerRecursiveCollection(): void
+    {
+        Collection::macro('recursive', function () {
             return $this->map(function ($value) {
                 if (is_array($value) || is_object($value)) {
                     return collect($value)->recursive();
@@ -39,11 +52,6 @@ class Living
                 return $value;
             });
         });
-
-        if(!file_exists($cache.'.json')) {
-            return $this->getFromOpenData($cache);
-        }
-        return collect(json_decode(file_get_contents($cache.'.json'), true))->recursive();
     }
 
     /**
@@ -65,18 +73,17 @@ class Living
         return $result;
     }
 
-    public function getWithResidences($regions): Collection
+    /**
+     * @param Collection $regions
+     * @return Collection
+     */
+    public function getWithResidences(Collection $regions): Collection
     {
         $dataClass = new Data();
         $districtsAndNeighbourhoods = $dataClass->get('districts_and_neighbourhoods');
         foreach ($regions as $regionKey => $region) {
             foreach ($region->get('Provinces') as $provinceKey => $province) {
                 foreach ($province->get('Municipalities') as $municipalityKey => $municipality) {
-
-//                    if($municipality->get('Name') !== 'Súdwest-Fryslân') {
-//                        continue;
-//                    }
-
                     $districtsAndNeighbourhoodsOfMunicipality = $districtsAndNeighbourhoods->where('Municipality', $municipality->get('Code'))->all();
                     $municipality->put('Residences', $this->splitResidencesFromDistrictsAndNeighbourhoods($districtsAndNeighbourhoodsOfMunicipality, $municipality));
                     $regions->get($regionKey)->get('Provinces')->get($provinceKey)->get('Municipalities')->put($municipalityKey, $municipality);
@@ -86,7 +93,11 @@ class Living
         return $regions;
     }
 
-    private function getBaseData(string $cache = '')
+    /**
+     * @param string $cache
+     * @return Collection
+     */
+    private function getBaseData(string $cache = ''): Collection
     {
         $dataClass = new Data();
         $residencesTableInfos = $dataClass->get('residences_table_infos');
@@ -143,7 +154,12 @@ class Living
     }
 
 
-    private function splitResidencesFromDistrictsAndNeighbourhoods($districtsAndNeighbourhoodsOfMunicipality, $municipality)
+    /**
+     * @param Collection $districtsAndNeighbourhoodsOfMunicipality
+     * @param Collection $municipality
+     * @return Collection
+     */
+    private function splitResidencesFromDistrictsAndNeighbourhoods(Collection $districtsAndNeighbourhoodsOfMunicipality, Collection $municipality)
     {
         $residences = new Collection();
         $residencesData = $municipality->get('Residences');
