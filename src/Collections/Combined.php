@@ -90,7 +90,7 @@ class Combined
         foreach ($regions as $regionKey => $region) {
             foreach ($region->get('Provinces') as $provinceKey => $province) {
                 foreach ($province->get('Municipalities') as $municipalityKey => $municipality) {
-                    $districtsAndNeighbourhoodsOfMunicipality = $districtsAndNeighbourhoods->where('Municipality', $municipality->get('Code'))->all();
+                    $districtsAndNeighbourhoodsOfMunicipality = new Collection($districtsAndNeighbourhoods->where('Municipality', $municipality->get('Code'))->all());
                     $municipality->put('Residences', $this->splitResidencesFromDistrictsAndNeighbourhoods($districtsAndNeighbourhoodsOfMunicipality, $municipality));
                     $regions->get($regionKey)->get('Provinces')->get($provinceKey)->get('Municipalities')->put($municipalityKey, $municipality);
                 }
