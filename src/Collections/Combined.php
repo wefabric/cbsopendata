@@ -105,6 +105,10 @@ class Combined
      */
     private function getBaseData(string $cache = ''): Collection
     {
+        if($cache && $file = $this->getFilesystem()->get($cache.'.json')) {
+            return collect(json_decode($file->read(), true))->recursive();
+        }
+
         $dataClass = new Data();
         $residencesTableInfos = $dataClass->get('residences_table_infos');
         $residences = $dataClass->get('residences');
@@ -112,6 +116,7 @@ class Combined
         $living = new Collection();
         $count = 0;
         foreach ($residencesTableInfos as $residencesTableInfo) {
+
             $count++;
             if(!$countryPart = $living->where('Code', $residencesTableInfo->get('CountryPart')['Code'])->first()) {
                 $countryPart = new Collection();
@@ -175,7 +180,6 @@ class Combined
         foreach ($districtsAndNeighbourhoodsOfMunicipality as $item) {
 
             if(isset($item['Description']) && $item['Description']) {
-
 
                 $strippedDescription = rtrim(str_replace('('.$item['Municipality'].')', '', $item['Description']));
                 preg_match_all('/(Gemeente) \'(.*)\'/', $strippedDescription, $matches);
@@ -248,7 +252,6 @@ class Combined
                             }
 
                             if($residence && !$residence->get('Districts')->where('Title', $matches[1][0])->first()) {
-
                                 $residenceKey = $residences->where('Title', $residenceMatches[1][0])->keys()->first();
                                 $district = new Collection($item);
                                 $district->put('Neighbourhoods', new Collection());
@@ -274,6 +277,16 @@ class Combined
 
             }
         }
+
+        // Add the residences which do not have districts and neighbourhoods
+        if($residences->count() !== $residencesData->count()) {
+            foreach ($residencesData as $residenceItem) {
+                if(!$residences->where('Key', $residenceItem->get('Key'))->first()) {
+                    $residences->push($residenceItem);
+                }
+            }
+        }
+
         return $residences;
     }
 }

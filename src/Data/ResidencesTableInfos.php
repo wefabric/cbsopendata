@@ -17,6 +17,8 @@ class ResidencesTableInfos extends AbstractData
         foreach ($data as $key => $item) {
             $itemCollection = new Collection();
 
+            $itemCollection->put('ID', $item['ID']);
+
             if(isset($item['Woonplaatsen'], $item['Woonplaatscode_1'])) {
                 $residence = [
                     'Name' => rtrim($item['Woonplaatsen']),
