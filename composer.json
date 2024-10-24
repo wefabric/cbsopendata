@@ -12,9 +12,9 @@
   "version": "0.2.5",
   "require": {
     "symfony/var-dumper": "*",
-    "illuminate/support": "^8.32",
-    "guzzlehttp/guzzle": "^7.0",
-    "league/flysystem": "^1.1"
+    "illuminate/support": "*",
+    "guzzlehttp/guzzle": "*",
+    "league/flysystem": "*"
   },
   "autoload": {
     "psr-4": {
