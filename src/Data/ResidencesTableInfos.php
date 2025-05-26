@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 class ResidencesTableInfos extends AbstractData
 {
-    const OPENDATA_URL = 'https://opendata.cbs.nl/ODataApi/odata/84734NED/TypedDataSet';
+    const OPENDATA_URL = 'https://opendata.cbs.nl/ODataapi/odata/86097NED/TypedDataSet';
 
     const CACHE_KEY = 'opendata_residences_table_infos';
 
@@ -19,9 +19,9 @@ class ResidencesTableInfos extends AbstractData
 
             $itemCollection->put('ID', $item['ID']);
 
-            if(isset($item['Woonplaatsen'], $item['Woonplaatscode_1'])) {
+            if(isset($item['RegioS'], $item['Woonplaatscode_1'])) {
                 $residence = [
-                    'Name' => rtrim($item['Woonplaatsen']),
+                    'Name' => rtrim($item['RegioS']),
                     'Code' => rtrim($item['Woonplaatscode_1'])
                 ];
 

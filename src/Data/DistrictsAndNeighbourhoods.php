@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 class DistrictsAndNeighbourhoods extends AbstractData
 {
-    const OPENDATA_URL = 'https://opendata.cbs.nl/ODataApi/odata/84799NED/WijkenEnBuurten';
+    const OPENDATA_URL = 'https://opendata.cbs.nl/ODataApi/odata/85984NED/WijkenEnBuurten';
 
     const CACHE_KEY = 'opendata_districts_and_neighbourhoods';
 

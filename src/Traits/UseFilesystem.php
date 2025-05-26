@@ -3,8 +3,8 @@
 namespace CBSOpenData\Traits;
 
 use CBSOpenData\OpenData;
-use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 
 trait UseFilesystem
 {
@@ -19,7 +19,7 @@ trait UseFilesystem
     public function getFilesystem(): Filesystem
     {
         if(!$this->filesystem) {
-            $this->setFilesystem(new Filesystem(new Local(OpenData::cachePath())));
+            $this->setFilesystem(new Filesystem(new LocalFilesystemAdapter(OpenData::cachePath())));
         }
 
         return $this->filesystem;

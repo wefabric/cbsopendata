@@ -73,7 +73,7 @@ class Combined
         if($result = $this->getBaseData($baseDataCache)) {
             $result =  $this->getWithResidences($result);
             if($result) {
-                $this->getFilesystem()->put(self::CACHE_KEY.'.json', $result->toJson());
+                $this->getFilesystem()->write(self::CACHE_KEY.'.json', $result->toJson());
             }
         }
         return $result;

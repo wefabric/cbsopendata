@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 
 class Regions extends AbstractData
 {
-    const OPENDATA_URL = 'https://opendata.cbs.nl/ODataApi/odata/84929NED/RegioS';
+    const OPENDATA_URL = 'https://opendata.cbs.nl/ODataApi/odata/86097NED/RegioS';
 
     const CACHE_KEY = 'opendata_regions';
 

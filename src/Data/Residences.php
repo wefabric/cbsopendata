@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 class Residences extends AbstractData
 {
-    const OPENDATA_URL = 'https://opendata.cbs.nl/ODataApi/odata/84734NED/Woonplaatsen';
+    const OPENDATA_URL = 'https://opendata.cbs.nl/ODataApi/odata/86097NED/RegioS';
 
     const CACHE_KEY = 'opendata_residences';
 
